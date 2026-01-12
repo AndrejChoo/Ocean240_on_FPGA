@@ -32,9 +32,7 @@ module ocean_240(
 	input wire HOLD,
 	input wire SW0,
 	input wire SW1,
-	output wire LED,
-	output wire[7:0]SEG,
-	output wire[7:0]RAZR
+	output wire LED
 );
 
 
@@ -453,28 +451,7 @@ wire[7:0]MEM_DO;
 assign MEM_DO = (sr_hl)? ER_D[15:8] : ER_D[7:0];
 assign CPU_DI = (RM==0)? MEM_DO : ((RIO==0)? dio : 8'h00);
 
-//Debug
-
-//Модуль динамической индикации
-din7seg md7s(
-.clk(clk),
-.I0({1'b0,PE1H[2:0]}),
-.I1({1'b0,PE1H[5:3]}),
-.I2(),
-.I3(),
-.I4(),
-.I5(),
-.I6(),
-.I7(),
-.SEG(SEG),
-.RAZR(RAZR)
-);
-
 endmodule
-
-
-
-
 
 
 
@@ -578,6 +555,7 @@ always@(posedge clk or negedge rst)
 assign VO = vo;
 
 endmodule
+
 
 
 
