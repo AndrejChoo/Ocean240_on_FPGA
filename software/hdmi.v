@@ -4,7 +4,6 @@ module hdmi(
 	input n_rst,
 	output [2:0] TMDSp, //TMDSn,
 	output TMDSp_clock,//, TMDSn_clock
-	input wire color,
 	input wire [7:0] red,
 	input wire [7:0] blue,
 	input wire [7:0] green,
@@ -22,8 +21,7 @@ always @(posedge pixclk or negedge n_rst)
 		if(!n_rst) DrawArea <= 0;
 		else 
 			begin
-				if(color) DrawArea <= (CounterX>80) && (CounterX<882) && (CounterY>21) && (CounterY<623); //800x600
-				else DrawArea <= (CounterX>47) && (CounterX<689) && (CounterY>32) && (CounterY<514); //640x480
+				DrawArea <= (CounterX>80) && (CounterX<882) && (CounterY>21) && (CounterY<623); //800x600
 			end
 	end
 
@@ -32,8 +30,7 @@ always @(posedge pixclk or negedge n_rst)
 		if(!n_rst) CounterX <= 0;
 		else 
 			begin
-				if(color) CounterX <= (CounterX==1055) ? 0 : CounterX+1; //800x600 
-				else CounterX <= (CounterX==800) ? 0 : CounterX+1; //640x480
+				CounterX <= (CounterX==1055) ? 0 : CounterX+1; //800x600 
 			end
 	end
 always @(posedge pixclk or negedge n_rst) 
@@ -41,27 +38,18 @@ always @(posedge pixclk or negedge n_rst)
 		if(!n_rst) CounterY <= 0;
 		else 
 			begin
-				if(color)
-					begin
-						if(CounterX==1055) CounterY <= (CounterY==627) ? 0 : CounterY+1; //800x600
-					end
-				else
-					begin
-						if(CounterX==800) CounterY <= (CounterY==525) ? 0 : CounterY+1; //640x480
-					end
+				if(CounterX==1055) CounterY <= (CounterY==627) ? 0 : CounterY+1; //800x600
 			end
 	end
 
 always @(posedge pixclk) 
 	begin
-		if(color) hSync <= (CounterX>921); //800x600
-		else hSync <= (CounterX>702);	//640x480
+		hSync <= (CounterX>921); //800x600
 	end
 
 always @(posedge pixclk) 
 	begin
-		if(color) vSync <= (CounterY>521); //800x600
-		else vSync <= (CounterY>521);	//640x480
+		vSync <= (CounterY>521); //800x600
 	end
 
 assign vs = vSync;
