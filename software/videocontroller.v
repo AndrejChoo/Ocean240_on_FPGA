@@ -23,7 +23,7 @@ wire[10:0]HCNT,VCNT;
 wire VISIBLE;
 
 hdmi mhd(.pixclk(pixclk),.clk_TMDS(hclk),.n_rst(rst),.TMDSp(tmds),.TMDSp_clock(tmdsc),
-		   .color(color),.red(R),.green(G),.blue(B),.visible(VISIBLE),.HCNT(HCNT),.VCNT(VCNT));
+		   .red(R),.green(G),.blue(B),.visible(VISIBLE),.HCNT(HCNT),.VCNT(VCNT));
 
 //VIDEORAM
 wire[14:0]RD_ADD;
@@ -44,9 +44,9 @@ vram mvr(
 wire BORDER,BV_BORDER,C_BORDER;
 wire[7:0]Rb,Gb,Bb;
 
-assign BV_BORDER = (HCNT > 110 && HCNT < 622 && VCNT > 143 && VCNT < 401)? 1'b1 : 1'b0; //Nomochrome
-assign C_BORDER = (HCNT > 222 && HCNT < 733 && VCNT > 66 && VCNT < 579)? 1'b1 : 1'b0; //COLOR
-assign BORDER = (color)? C_BORDER : BV_BORDER;
+//assign BV_BORDER = (HCNT > 110 && HCNT < 622 && VCNT > 143 && VCNT < 401)? 1'b1 : 1'b0; //Nomochrome
+assign BORDER = (HCNT > 222 && HCNT < 733 && VCNT > 66 && VCNT < 579)? 1'b1 : 1'b0; //COLOR
+//assign BORDER = (color)? C_BORDER : BV_BORDER;
 
 //Гашение
 assign R = (VISIBLE)? Rx : 8'h00;	
@@ -59,34 +59,11 @@ assign Bx = (BORDER)? Bb : 8'h0F;
 
 wire[10:0]NHCNT,NVCNT;
 
-assign NHCNT = (color)? (HCNT - 206) : (HCNT - 103);
-assign NVCNT = (color)? (VCNT - 50 - 17) : (VCNT - 135 - 9);
+assign NHCNT = (HCNT - 206);
+assign NVCNT = (VCNT - 50 - 17);
 
 //Автомат чтения данных знакоместа и шрифта
-reg[7:0]tzd,zd;
 reg vclk;
-
-//Monochrome
-always@(negedge pixclk or negedge rst)
-	begin
-		if(!rst)
-			begin	
-				zd <= 0;
-				tzd <= 0;
-				vclk <= 0;
-			end
-		else
-			begin
-				case(NHCNT[2:0])
-					1: vclk <= 1'b1;
-					4: vclk <= 1'b0;
-					7: tzd <= VR_DO;
-					0: zd <= tzd;
-				endcase
-			end
-	end
-
-//COLOR	
 reg[15:0]tzdc,zdc;
 
 always@(negedge pixclk or negedge rst)
@@ -99,7 +76,11 @@ always@(negedge pixclk or negedge rst)
 		else
 			begin
 				case(NHCNT[3:0])
+					1: vclk <= 1'b1;
+					4: vclk <= 1'b0;
 					7: tzdc[7:0] <= VR_DO[7:0];
+					10: vclk <= 1'b1;
+					12: vclk <= 1'b0;
 					14: tzdc[15:8] <= VR_DO[7:0];
 					0: zdc <= tzdc;
 				endcase
@@ -113,8 +94,7 @@ wire[3:0]MP;
 
 assign VSCRL = NVCNT[8:1] + VSCROLL[7:0];
 assign HSCRL = NHCNT[8:3];// + HSCROLL[5:0];
-assign MHVSCRL = NVCNT[7:0] + VSCROLL[7:0];	
-assign RD_ADD[13:0] = (color)? ({HSCRL,VSCRL}) : ({HSCRL,MHVSCRL}); //  - HSCROLL[7:1] - HSCROLL
+assign RD_ADD[13:0] = {HSCRL,VSCRL}; //  - HSCROLL[7:1] - HSCROLL
 assign VR_RCLK = ~vclk;
 assign VR_WREN = ~WM;
 assign MP[3:0] = {MAPPER[5:4],MAPPER[1:0]};
@@ -190,9 +170,9 @@ wire[23:0]BK;
 
 assign BK =  PALETTE[palet][(bkgnd[2:0])];
 
-assign BRb = (zd[((NHCNT[2:0]))])? PALETTE[palet][4][23:16] : BK[23:16];
-assign BGb = (zd[((NHCNT[2:0]))])? PALETTE[palet][4][15:8]  : BK[15:8];
-assign BBb = (zd[((NHCNT[2:0]))])? PALETTE[palet][4][7:0]   : BK[7:0];
+assign BRb = (zdc[((NHCNT[3:0]))])? PALETTE[palet][4][23:16] : BK[23:16];
+assign BGb = (zdc[((NHCNT[3:0]))])? PALETTE[palet][4][15:8]  : BK[15:8];
+assign BBb = (zdc[((NHCNT[3:0]))])? PALETTE[palet][4][7:0]   : BK[7:0];
 
 //Цветное
 assign CRb = PALETTE[palet][{zdc[(NHCNT[3:1])],zdc[(NHCNT[3:1])+8]}][23:16];
