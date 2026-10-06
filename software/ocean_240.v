@@ -75,7 +75,7 @@ vm80a_core mcp
    .pin_wr_n(WO),
    .pin_dbin(DBIN),
 	.pin_hlda(HLDA),
-	.pin_sync(SYNC),
+	.pin_sync(SYNC)
 );
 
 reg[7:0]i8080ctrl;
@@ -125,7 +125,7 @@ programmer mpg(
 	.SPISTART(SPI_START_P),
 	.SPIDI(SPI_DI_P),
 	.SPIDO(SPI_DO),
-	.SPIRDY(SPI_RDY),
+	.SPIRDY(SPI_RDY)
 	);
 
 /*
