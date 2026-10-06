@@ -35,9 +35,8 @@ module ocean_240(
 	output wire LED
 );
 
-
 //Clocking
-wire CLK2_5,CLK5,CLK10,CLK20,CLK25,CLK125,CLK40,CLK200,CPU_CLK;
+wire CLK2_5,CLK5,CLK10,CLK20,CLK25,CLK40,CLK200,CPU_CLK;
 
 main_pll mpl(.inclk0(clk),.c0(CLK20),.c1(CLK25),.c2(CLK125),.c3(CLK40),.c4(CLK200));
 
@@ -419,15 +418,12 @@ assign ER_BL = (PROG)? 1'b0 : ((sr_hl)? 1'b1 : 1'b0);
 
 
 //Videoprocessor
-wire PIXCLK,HCLK;
 
-assign PIXCLK = (color)? CLK40 : CLK25;
-assign HCLK = (color)? CLK200 : CLK125;
 
 videocontroller mvc(
 	.rst(rst),
-	.pixclk(PIXCLK),
-	.hclk(HCLK),
+	.pixclk(CLK40),
+	.hclk(CLK200),
 	.CPU_ADD(CPU_ADD),
 	.MAPPER(mapper),
 	.CPU_DO(CPU_DO),
@@ -552,12 +548,6 @@ always@(posedge clk or negedge rst)
 assign VO = vo;
 
 endmodule
-
-
-
-
-
-
 
 
 
